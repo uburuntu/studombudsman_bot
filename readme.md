@@ -4,7 +4,7 @@
 
 Работает на Python 3.
 
-## Как запустить
+## Как запустить:
 
 ### 1. Выставить токены и пароли для доступа
 
@@ -18,7 +18,14 @@
 ./keepalive.sh
 ```
 
+## Работающие боты:
+
+- Общий бот: [@student_service_bot](https://t.me/student_service_bot)
+- Бот МГУ: [@msugobot](https://t.me/msugobot)
+
+На данный момент используют единый код, в дальнейшем будут специализированы под нужды вуза.
+
 ## Подробнее:
 
-- Группа Уполномоченного: vk.com/studombudsman_msk
-- Сайт Уполномоченного: student-service.ru
+- Группа Уполномоченного: [vk.com/studombudsman_msk](https://vk.com/studombudsman_msk)
+- Сайт Уполномоченного: [student-service.ru](http://student-service.ru)
