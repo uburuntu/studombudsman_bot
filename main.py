@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*- 
+# !/usr/bin/env python
+#  -*- coding: utf-8 -*-
 
 import os
 import time
@@ -6,8 +7,10 @@ import time
 from requests import ReadTimeout
 from telebot import types
 
+from commands import admin_tools
 from users_controller import UsersController
-from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log
+from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log, bot_admin_command, \
+    bot_name, commands_handler
 
 people = set()
 current_controller = UsersController()
@@ -78,6 +81,26 @@ def start(mes):
     build_child(mes)
 
 
+@bot.message_handler(func=commands_handler(['/update']))
+@bot_admin_command
+def command_update(message):
+    user_action_log(message, "called: " + message.text)
+    parts = message.text.split()
+    if len(parts) < 2 or parts[1] != bot_name:
+        return
+    admin_tools.update_bot(message)
+
+
+@bot.message_handler(func=commands_handler(['/kill']))
+@bot_admin_command
+def command_kill(message):
+    user_action_log(message, "called: " + message.text)
+    parts = message.text.split()
+    if len(parts) < 2 or parts[1] != bot_name:
+        return
+    admin_tools.kill_bot(message)
+
+
 # All messages handler
 def handle_messages(messages):
     dump_messages(messages)
@@ -116,7 +139,7 @@ while __name__ == '__main__':
 
     # кто-то обратился к боту на кириллице
     except UnicodeEncodeError as e:
-        action_log("Unicode Encode Error. Someone typed in cyrillic. Retrying in 5 seconds.")
+        action_log("Unicode Encode Error. Retrying in 5 seconds.")
         time.sleep(5)
 
     # завершение работы из консоли стандартным Ctrl-C
