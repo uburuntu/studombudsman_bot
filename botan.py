@@ -40,9 +40,10 @@ class Botan:
         text = message.text
         if isinstance(text, str):
             data['text'] = text
-            for entity in message.entities:
-                if entity.type == 'bot_command':
-                    data['bot_command'] = text[entity.offset:entity.length].split('@')[0]
+            if message.entities is not None:
+                for entity in message.entities:
+                    if entity.type == 'bot_command':
+                        data['bot_command'] = text[entity.offset:entity.length].split('@')[0]
 
         return data
 
