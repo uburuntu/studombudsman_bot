@@ -9,7 +9,7 @@ from telebot import types
 from commands import admin_tools
 from users_controller import UsersController
 from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log, bot_admin_command, \
-    bot_name, commands_handler, botan
+    bot_name, commands_handler, botan, user_name
 
 current_controller = UsersController()
 
@@ -75,6 +75,28 @@ def start(message):
     if message.from_user.id in current_controller.data.keys():
         return
     current_controller.start_session(message)
+
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(types.InlineKeyboardButton(text="МГУ", callback_data="set_school_msu"),
+                 types.InlineKeyboardButton(text="ВШЭ", callback_data="set_school_hse"))
+    keyboard.add(types.InlineKeyboardButton(text="Другой", callback_data="set_school_other"))
+    bot.send_message(message.from_user.id, "❓ Укажите свой вуз", parse_mode="HTML", reply_markup=keyboard)
+
+    build_child(message)
+
+
+@bot.message_handler(func=commands_handler(['/restart']))
+def restart(message):
+    if message.chat.type != 'private':
+        return
+    current_controller.start_session(message)
+
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(types.InlineKeyboardButton(text="МГУ", callback_data="set_school_msu"),
+                 types.InlineKeyboardButton(text="ВШЭ", callback_data="set_school_hse"))
+    keyboard.add(types.InlineKeyboardButton(text="Другой", callback_data="set_school_other"))
+    bot.send_message(message.from_user.id, "❓ Укажите свой вуз", parse_mode="HTML", reply_markup=keyboard)
+
     build_child(message)
 
 
@@ -86,6 +108,12 @@ def text(message):
         return
     current_controller.go_to_dir(message)
     build_child(message)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('set_school'))
+def callback_chai(call):
+    action_log(user_name(call.message.chat) + " called: " + call.data)
+    current_controller.set_school_callback(call)
 
 
 @bot.message_handler(func=commands_handler(['/update']))

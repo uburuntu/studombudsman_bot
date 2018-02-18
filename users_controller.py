@@ -3,7 +3,7 @@ import json
 
 import config
 from fs_interface import FileSystemInterface
-from utils import global_lock, is_non_zero_file
+from utils import global_lock, is_non_zero_file, bot
 
 
 # TODO: use database
@@ -71,3 +71,20 @@ class UsersController:
 
     def can_get_back(self, message):
         return self.data[str(message.from_user.id)]['deep'] > 0
+
+    def set_school_callback(self, call):
+        msg = call.message
+
+        text = "heh"
+        if call.data == "set_school_msu":
+            text = "✅ Выбран вуз: МГУ им М. В. Ломоносова"
+            self.data[str(msg.chat.id)]['school'] = 'msu'
+        elif call.data == "set_school_hse":
+            text = "✅ Выбран вуз: Высшая школа экономики"
+            self.data[str(msg.chat.id)]['school'] = 'hse'
+        elif call.data == "set_school_other":
+            text = "✅ Выбран вуз: другой"
+            self.data[str(msg.chat.id)]['school'] = 'other'
+        self.save()
+
+        bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text=text, parse_mode="HTML")
