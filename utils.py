@@ -10,10 +10,12 @@ import telebot
 
 import config
 import tokens
-
 # Инициализация бота
+from botan import Botan
+
 bot = telebot.TeleBot(tokens.bot, threaded=False)
 bot_name = '@' + bot.get_me().username
+botan = Botan(tokens.botan)
 
 global_lock = threading.Lock()
 message_dump_lock = threading.Lock()

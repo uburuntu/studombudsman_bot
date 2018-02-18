@@ -1,4 +1,3 @@
-# !/usr/bin/env python
 #  -*- coding: utf-8 -*-
 
 import os
@@ -10,7 +9,7 @@ from telebot import types
 from commands import admin_tools
 from users_controller import UsersController
 from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log, bot_admin_command, \
-    bot_name, commands_handler
+    bot_name, commands_handler, botan
 
 people = set()
 current_controller = UsersController()
@@ -103,6 +102,8 @@ def command_kill(message):
 
 # All messages handler
 def handle_messages(messages):
+    for message in messages:
+        botan.track(message)
     dump_messages(messages)
 
 
