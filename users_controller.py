@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from pathlib import Path
 
-from FileSytemInterface import FileSystemInterface
+from file_system_interface import FileSystemInterface
 
 
 class UsersController:

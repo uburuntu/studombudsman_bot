@@ -11,7 +11,7 @@ import os
 #
 # Manually through defaults in this file
 # Important: untrack file to prevent accidential private token pushing:
-# 'git update-index --assume-unchanged Tokens.py'
+# 'git update-index --assume-unchanged tokens.py'
 
 default_bot = ""
 bot = os.getenv('STUDOMBUDSMAN_BOT_TOKEN', default_bot)

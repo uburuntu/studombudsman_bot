@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*- 
 
-import telebot
+import os
+import time
+
+from requests import ReadTimeout
 from telebot import types
 
-import Tokens
-from UsersController import UsersController
-
-botan_key = Tokens.botan
-
-bot = telebot.TeleBot(Tokens.bot)
+from users_controller import UsersController
+from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log
 
 people = set()
 current_controller = UsersController()
@@ -18,7 +17,7 @@ def build_child(message):
     s = current_controller.print_path(message.from_user)
     keyboard = types.ReplyKeyboardMarkup()
     # s.sort()
-    if current_controller.can_get_back(message) == False:
+    if current_controller.can_get_back(message) is False:
         keyboard.row('1', '2', '3')
         keyboard.row('4', '5', '6')
         keyboard.row('7', '8', '9')
@@ -45,8 +44,8 @@ def build_child(message):
     my_file = open(news + '/' + 'main.txt')
     my_string = my_file.read()
     msg = bot.send_message(message.chat.id, my_string, reply_markup=keyboard)
-    print(msg)
-    print(current_controller.other_get_file_name(message))
+
+    user_action_log(message, 'now in ' + news)
     bot.register_next_step_handler(msg, where)
 
 
@@ -70,13 +69,59 @@ def where(message):
 
 @bot.message_handler(commands=['start'])
 def start(mes):
-    if (mes.chat.type != 'private'):
+    if mes.chat.type != 'private':
         return
-    if (mes.from_user.id in people):
+    if mes.from_user.id in people:
         return
     people.add(mes.from_user.id)
     current_controller.start_session(mes)
     build_child(mes)
 
 
-bot.polling()
+# All messages handler
+def handle_messages(messages):
+    dump_messages(messages)
+
+
+while __name__ == '__main__':
+    try:
+        action_log("Running bot!")
+
+        # Запуск Long Poll бота
+        bot.set_update_listener(handle_messages)
+        bot.polling(none_stop=True, timeout=60)
+        time.sleep(1)
+
+    # из-за Telegram API иногда какой-нибудь пакет не доходит
+    except ReadTimeout as e:
+        action_log("Read Timeout. Because of Telegram API. We are offline. Reconnecting in 5 seconds.")
+        time.sleep(5)
+
+    # если пропало соединение, то пытаемся снова
+    except ConnectionError as e:
+        action_log("Connection Error. We are offline. Reconnecting...")
+        time.sleep(5)
+
+    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
+    except RecursionError as e:
+        action_log("Recursion Error. Restarting...")
+        global_lock.acquire()
+        message_dump_lock.acquire()
+        os._exit(0)
+
+    # если Python сдурит и пойдёт в бесконечную рекурсию (не особо спасает)
+    except RuntimeError as e:
+        action_log("Runtime Error. Retrying in 5 seconds.")
+        time.sleep(5)
+
+    # кто-то обратился к боту на кириллице
+    except UnicodeEncodeError as e:
+        action_log("Unicode Encode Error. Someone typed in cyrillic. Retrying in 5 seconds.")
+        time.sleep(5)
+
+    # завершение работы из консоли стандартным Ctrl-C
+    except KeyboardInterrupt as e:
+        action_log("Keyboard Interrupt. Good bye.")
+        global_lock.acquire()
+        message_dump_lock.acquire()
+        os._exit(0)
