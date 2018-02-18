@@ -44,7 +44,7 @@ def build_child(message):
         keyboard.row(back)
 
     news = current_controller.other_get_file_name(message)
-    my_file = open(news + '/' + 'main.txt')
+    my_file = open(news + '/' + 'main.txt', encoding='utf-8')
     my_string = my_file.read()
     msg = bot.send_message(message.chat.id, my_string, reply_markup=keyboard)
 
