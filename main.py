@@ -11,7 +11,6 @@ from users_controller import UsersController
 from utils import bot, action_log, dump_messages, global_lock, message_dump_lock, user_action_log, bot_admin_command, \
     bot_name, commands_handler, botan
 
-people = set()
 current_controller = UsersController()
 
 
@@ -69,15 +68,24 @@ def where(message):
     build_child(message)
 
 
-@bot.message_handler(commands=['start'])
-def start(mes):
-    if mes.chat.type != 'private':
+@bot.message_handler(func=commands_handler(['/start']))
+def start(message):
+    if message.chat.type != 'private':
         return
-    if mes.from_user.id in people:
+    if message.from_user.id in current_controller.data.keys():
         return
-    people.add(mes.from_user.id)
-    current_controller.start_session(mes)
-    build_child(mes)
+    current_controller.start_session(message)
+    build_child(message)
+
+
+@bot.message_handler(content_types=['text'])
+def text(message):
+    if message.chat.type != 'private':
+        return
+    if message.from_user.id in current_controller.data.keys():
+        return
+    current_controller.go_to_dir(message)
+    build_child(message)
 
 
 @bot.message_handler(func=commands_handler(['/update']))

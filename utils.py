@@ -150,6 +150,10 @@ def cut_long_text(text, max_len=4250):
     yield text[last_cut:]
 
 
+def is_non_zero_file(file_path):
+    return path.isfile(file_path) and path.getsize(file_path) > 0
+
+
 def value_from_file(file_name, default=0):
     value = default
     if path.isfile(file_name):
